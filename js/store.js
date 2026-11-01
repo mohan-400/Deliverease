@@ -586,6 +586,9 @@ class DeliverEaseStore {
     });
 
     this.saveState();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.syncBooking) {
+      window.DeliverEase.cloudDB.syncBooking(newBooking);
+    }
     this.emit('booking:created', newBooking);
     if (!isSilent) {
       this.addNotification('New Booking Confirmed!', `Shipment ${trackingCode} registered. Total fare: ₹${grossFare.toLocaleString('en-IN')}`, 'booking');
@@ -617,6 +620,9 @@ class DeliverEaseStore {
     }, true);
 
     this.saveState();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.syncPool) {
+      window.DeliverEase.cloudDB.syncPool(pool);
+    }
     this.emit('spaceshare:matched', { pool, booking });
     this.addNotification('50-50 Space Match Secured!', `You saved 50% (₹${pool.splitCostPerParty.toLocaleString('en-IN')}) by sharing cargo space to ${pool.destination}!`, 'spaceshare');
     return booking;
@@ -644,6 +650,9 @@ class DeliverEaseStore {
 
     this.state.spaceSharingPool.unshift(newPool);
     this.saveState();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.syncPool) {
+      window.DeliverEase.cloudDB.syncPool(newPool);
+    }
     this.emit('spaceshare:created', newPool);
     this.addNotification('50-50 Share Offer Listed', `Your half-load offer to ${offerData.destination} is now open for matching!`, 'spaceshare');
     return newPool;
@@ -685,6 +694,9 @@ class DeliverEaseStore {
     booking.telemetry.lastMilestone = `Accepted by Driver ${driver.name}`;
 
     this.saveState();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.syncBooking) {
+      window.DeliverEase.cloudDB.syncBooking(booking);
+    }
     this.emit('driver:jobAccepted', booking);
     this.addNotification('Load Accepted!', `You accepted shipment ${booking.id}. Proceed to pickup warehouse.`, 'driver');
     return true;
@@ -726,6 +738,9 @@ class DeliverEaseStore {
     }
 
     this.saveState();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.syncBooking) {
+      window.DeliverEase.cloudDB.syncBooking(booking);
+    }
     this.emit('trip:updated', booking);
     return { success: true, booking };
   }

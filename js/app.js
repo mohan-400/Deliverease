@@ -17,6 +17,10 @@ window.DeliverEase.ui = {
     this.renderDrawer();
     this.bindEvents();
 
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.init) {
+      window.DeliverEase.cloudDB.init();
+    }
+
     // Subscribe to store events for targeted updates (NO full page rebuilds!)
     window.DeliverEase.store.subscribe('booking:created', () => {
       this.updateHeaderProfile();
@@ -124,6 +128,9 @@ window.DeliverEase.ui = {
 
     this.updateHeaderProfile();
     this.updateNotifBadge();
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.updateCloudStatusPill) {
+      window.DeliverEase.cloudDB.updateCloudStatusPill();
+    }
   },
 
   updateHeaderProfile() {
@@ -215,6 +222,12 @@ window.DeliverEase.ui = {
       if (drawer.classList.contains('active')) {
         this.renderDrawer();
       }
+    }
+  },
+
+  openCloudModal() {
+    if (window.DeliverEase.cloudDB && window.DeliverEase.cloudDB.renderConfigModal) {
+      this.openModal(window.DeliverEase.cloudDB.renderConfigModal());
     }
   },
 
