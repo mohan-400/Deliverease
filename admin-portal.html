@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeliverEase Internal Operations & Command Center</title>
+  <meta name="robots" content="noindex, nofollow" />
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Private Admin Portal Custom Dark Command Center Theme */
+    body {
+      background: #090d16;
+      color: #f1f5f9;
+    }
+    .admin-header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 0.85rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .admin-header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      color: #f8fafc;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1.5rem;
+    }
+    .admin-card .card-header {
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+    }
+    .admin-card .card-title {
+      color: white;
+    }
+    .admin-stat {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+    .admin-stat .stat-label {
+      color: #94a3b8;
+    }
+    .admin-stat .stat-value {
+      color: white;
+    }
+    .admin-table th {
+      background: #1e293b;
+      color: #cbd5e1;
+      border-bottom: 1px solid #334155;
+    }
+    .admin-table td {
+      border-bottom: 1px solid #1e293b;
+      color: #f1f5f9;
+    }
+    .admin-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .pin-screen-container {
+      position: fixed;
+      inset: 0;
+      background: #090d16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .pin-box {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .pin-input {
+      font-size: 2rem;
+      letter-spacing: 0.4em;
+      text-align: center;
+      font-weight: 800;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      width: 100%;
+      margin: 1.25rem 0;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Master PIN Gate Screen -->
+  <div class="pin-screen-container" id="adminPinGate">
+    <div class="pin-box">
+      <div style="width: 56px; height: 56px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1rem auto; border: 1px solid rgba(56, 189, 248, 0.3);">
+        🛡️
+      </div>
+      <h2 style="color: white; font-size: 1.35rem; font-weight: 800;">DeliverEase Internal Portal</h2>
+      <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem;">Authorized Personnel Only • Hardware 2FA Secured</p>
+
+      <form onsubmit="handlePinSubmit(event)">
+        <input type="password" id="adminPinInput" class="pin-input" maxlength="4" placeholder="••••" autofocus required />
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 1rem;">
+          Default Master Security PIN: <strong style="color: #38bdf8;">8821</strong>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          🔓 Unlock Operations Center
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authenticated Operations Dashboard -->
+  <div id="adminAppContainer" style="display: none;">
+    <!-- Top Internal Header -->
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 36px; height: 36px; background: #2563eb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800;">
+            🛡️
+          </div>
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: white;">
+              DeliverEase <span style="color: #38bdf8;">Internal Operations Console</span>
+            </div>
+            <div style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase;">
+              Secure Portal • Connected to Live Central Store
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span class="badge badge-success" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">
+            ● Live System Active
+          </span>
+          <button class="btn btn-secondary btn-sm" onclick="lockPortal()">
+            🔒 Lock Portal
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="resetDatabase()">
+            🔄 Reset Store
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Command Body -->
+    <main class="app-main" style="padding-top: 1.5rem;">
+      <!-- Key Executive Financial KPIs -->
+      <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div class="admin-stat">
+          <div class="stat-label">Total Freight GMV</div>
+          <div class="stat-value" id="statGMV" style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin: 0.25rem 0;">₹0.00</div>
+          <div class="stat-delta positive">All national bookings</div>
+        </div>
+
+        <div class="admin-stat">
+          <div class="stat-label">10% DeliverEase Commission Revenue</div>
+          <div class="stat-value" id="statCommission" style="font-size: 1.8rem; font-weight: 800; color: #34d399; margin: 0.25rem 0;">₹0.00</div>
+          <div class="stat-delta positive">Strict 10% Flat Rate</div>
+        </div>
+
+        <div class="admin-stat">
+          <div class="stat-label">Commercial Fleet Drivers</div>
+          <div class="stat-value" id="statDrivers" style="font-size: 1.8rem; font-weight: 800; margin: 0.25rem 0;">0 Active</div>
+          <div class="stat-delta positive">100% CDL Verified</div>
+        </div>
+
+        <div class="admin-stat">
+          <div class="stat-label">Active Shippers & Enterprises</div>
+          <div class="stat-value" id="statUsers" style="font-size: 1.8rem; font-weight: 800; margin: 0.25rem 0;">0 Accounts</div>
+          <div class="stat-delta positive">Aadhaar / GST Verified</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Driver & Commercial Fleet KYC Approvals -->
+        <div class="admin-card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">👨‍✈️ Driver Verification & RTO Fleet Desk</h3>
+            <span class="badge badge-primary">KYC Approvals</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table admin-table" id="driverKycTable">
+              <thead>
+                <tr>
+                  <th>Driver Name</th>
+                  <th>Vehicle / RTO Plate</th>
+                  <th>Commercial DL</th>
+                  <th>KYC Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="driverKycTbody">
+                <!-- Dynamically populated from store -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Live Platform Activity & Dispatches -->
+        <div class="admin-card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">📡 Live National Freight Feed</h3>
+            <span class="badge badge-success">Real-Time Sync</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="recentActivityList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Master All-in-One Shipment Registry -->
+      <div class="admin-card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="card-title">📋 Central National Freight Registry (All Corridors)</h3>
+          <button class="btn btn-secondary btn-sm" onclick="renderAdminDashboard()">
+            🔄 Refresh Registry
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table admin-table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Shipper</th>
+                <th>National Corridor</th>
+                <th>Assigned Driver</th>
+                <th>Cargo Class</th>
+                <th>Gross Total (₹)</th>
+                <th>10% Fee</th>
+                <th>Driver Net (90%)</th>
+                <th>Status</th>
+                <th>e-POD OTP</th>
+              </tr>
+            </thead>
+            <tbody id="allShipmentsTbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- DeliverEase Core Store Scripts -->
+  <script src="js/store.js"></script>
+  <script>
+    // Master PIN authentication logic
+    function handlePinSubmit(e) {
+      e.preventDefault();
+      const pin = document.getElementById('adminPinInput').value;
+      if (pin === '8821') {
+        document.getElementById('adminPinGate').style.display = 'none';
+        document.getElementById('adminAppContainer').style.display = 'block';
+        renderAdminDashboard();
+      } else {
+        alert('Invalid Master Security PIN. Access Denied.');
+      }
+    }
+
+    function lockPortal() {
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('adminAppContainer').style.display = 'none';
+      document.getElementById('adminPinGate').style.display = 'flex';
+    }
+
+    function resetDatabase() {
+      if (confirm('Reset DeliverEase central database to factory demo state?')) {
+        window.DeliverEase.store.resetDemoData();
+        renderAdminDashboard();
+      }
+    }
+
+    function renderAdminDashboard() {
+      const store = window.DeliverEase.store;
+      const state = store.getState();
+      const users = state.users;
+      const bookings = state.bookings;
+      const drivers = users.filter(u => u.role === 'driver');
+      const customers = users.filter(u => u.role === 'customer' || u.role === 'organization');
+
+      const totalGMV = bookings.reduce((sum, b) => sum + (b.grossFare || 0), 0);
+      const totalCommission = bookings.reduce((sum, b) => sum + (b.platformFee || 0), 0);
+
+      document.getElementById('statGMV').innerText = '₹' + totalGMV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('statCommission').innerText = '₹' + totalCommission.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('statDrivers').innerText = drivers.length + ' Commercial';
+      document.getElementById('statUsers').innerText = customers.length + ' Shippers';
+
+      // Render Driver KYC
+      const kycTbody = document.getElementById('driverKycTbody');
+      if (kycTbody) {
+        kycTbody.innerHTML = drivers.map(d => `
+          <tr>
+            <td><strong>${d.name}</strong><br><span style="font-size:0.7rem; color:#94a3b8;">${d.phone}</span></td>
+            <td>${d.vehicleName || 'Eicher Pro 24ft'}<br><code style="background:#1e293b; color:#38bdf8; padding:2px 6px; border-radius:4px;">${d.plateNumber || 'MH-04-AB-4821'}</code></td>
+            <td><span style="font-family:var(--font-mono); font-size:0.75rem;">${d.driverLicense || 'DL-MH042018009214'}</span></td>
+            <td>
+              <span class="badge ${d.kycStatus.includes('Verified') ? 'badge-success' : 'badge-warning'}">
+                ${d.kycStatus}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-emerald btn-sm" onclick="toggleDriverKYC('${d.id}', true)">✓ Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="toggleDriverKYC('${d.id}', false)">✕ Reject</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Shipments
+      const shipTbody = document.getElementById('allShipmentsTbody');
+      if (shipTbody) {
+        shipTbody.innerHTML = bookings.map(b => `
+          <tr>
+            <td><code>${b.id}</code></td>
+            <td><strong>${b.customerName}</strong></td>
+            <td>${b.origin.split(' ')[0]} ➔ ${b.destination.split(' ')[0]}</td>
+            <td>${b.driverName || '<span style="color:#64748b;">Unassigned</span>'}</td>
+            <td>${b.cargoType.substring(0, 24)}...</td>
+            <td><strong>₹${b.grossFare.toLocaleString('en-IN')}</strong></td>
+            <td style="color:#34d399; font-weight:700;">₹${b.platformFee.toLocaleString('en-IN')}</td>
+            <td style="color:#38bdf8;">₹${b.driverEarnings.toLocaleString('en-IN')}</td>
+            <td>
+              <span class="badge ${b.status === 'In-Transit' ? 'badge-success' : b.status === 'Delivered' ? 'badge-neutral' : 'badge-primary'}">
+                ${b.status}
+              </span>
+            </td>
+            <td><strong style="color:#fbbf24; font-family:var(--font-mono);">${b.podOtp}</strong></td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Activity feed
+      const activityFeed = document.getElementById('recentActivityList');
+      if (activityFeed) {
+        activityFeed.innerHTML = state.notifications.slice(0, 4).map(n => `
+          <div style="background:#1e293b; padding:0.75rem; border-radius:8px; border-left:3px solid #38bdf8;">
+            <div style="font-weight:700; font-size:0.8rem; color:white;">${n.title}</div>
+            <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">${n.message}</div>
+            <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">${n.time}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleDriverKYC(driverId, approve) {
+      window.DeliverEase.store.verifyDriverKYC(driverId, approve);
+      renderAdminDashboard();
+    }
+
+    // Auto update whenever store changes
+    window.addEventListener('storage', () => {
+      renderAdminDashboard();
+    });
+  </script>
+</body>
+</html>

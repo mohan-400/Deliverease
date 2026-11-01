@@ -1,0 +1,8 @@
+# DeliverEase - Git Ignore
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+*.swp
+*.bak

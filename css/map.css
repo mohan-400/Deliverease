@@ -1,0 +1,90 @@
+/* DeliverEase - Map & GPS Radar Styling (High Performance GPU-Accelerated) */
+
+.map-container-wrapper {
+  position: relative;
+  width: 100%;
+  height: 440px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid #1e293b;
+  box-shadow: var(--shadow-md);
+  background: #090d16;
+  contain: paint;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Floating Telemetry HUD */
+.map-floating-overlay {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.92);
+  color: white;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  max-width: 280px;
+  pointer-events: auto;
+}
+
+.map-floating-title {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.map-floating-status {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.map-floating-controls {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.map-pill-btn {
+  background: rgba(15, 23, 42, 0.88);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.map-pill-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
