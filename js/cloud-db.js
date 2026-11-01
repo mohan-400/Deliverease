@@ -1,7 +1,7 @@
 /**
  * DeliverEase - Cloud Database Adapter (Firebase Firestore & Realtime Engine)
- * Connects DeliverEase to Cloud Firestore for cross-device realtime synchronization.
- * Supports offline caching, live listeners for bookings and 50-50 sharing, and easy 1-click config.
+ * Connected to Firebase Project: deliverease-756ec
+ * Cross-device realtime synchronization, live trip dispatch, and offline caching
  */
 
 window.DeliverEase = window.DeliverEase || {};
@@ -9,25 +9,36 @@ window.TransLogix = window.DeliverEase;
 
 const FIREBASE_CONFIG_KEY = 'deliverease_firebase_config';
 
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDbcfiLViv4JjRJEgnfytpZ5CbeUjxr79c",
+  authDomain: "deliverease-756ec.firebaseapp.com",
+  projectId: "deliverease-756ec",
+  storageBucket: "deliverease-756ec.firebasestorage.app",
+  messagingSenderId: "63523845169",
+  appId: "1:63523845169:web:e66ddc40d93a82ae151110",
+  measurementId: "G-R9H5W7D6QR"
+};
+
 window.DeliverEase.cloudDB = {
   db: null,
   isLive: false,
   unsubscribers: [],
 
   init() {
-    const savedConfig = this.loadConfig();
-    if (savedConfig && savedConfig.apiKey && savedConfig.projectId) {
-      this.connect(savedConfig, false);
+    const config = this.loadConfig() || DEFAULT_FIREBASE_CONFIG;
+    if (config && config.apiKey && config.projectId) {
+      this.connect(config, false);
     }
   },
 
   loadConfig() {
     try {
       const stored = localStorage.getItem(FIREBASE_CONFIG_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (stored) return JSON.parse(stored);
     } catch (e) {
-      return null;
+      // fallback
     }
+    return DEFAULT_FIREBASE_CONFIG;
   },
 
   saveConfig(config) {
@@ -84,7 +95,7 @@ window.DeliverEase.cloudDB = {
     this.isLive = false;
     this.updateCloudStatusPill();
     if (window.DeliverEase.ui) {
-      window.DeliverEase.ui.showToast('Disconnected from Cloud DB. Running in Local Offline Mode.', 'warning');
+      window.DeliverEase.ui.showToast('Disconnected from Cloud DB. Running in Local Mode.', 'warning');
     }
   },
 
@@ -93,7 +104,22 @@ window.DeliverEase.cloudDB = {
     if (!this.db) return;
 
     try {
-      // 1. Listen for new bookings & status updates
+      // Seed cloud database if it is brand new
+      this.db.collection('deliverease_bookings').limit(1).get().then(snapshot => {
+        if (snapshot.empty) {
+          const store = window.DeliverEase.store;
+          if (store && store.state && store.state.bookings) {
+            store.state.bookings.forEach(b => this.syncBooking(b));
+          }
+          if (store && store.state && store.state.spaceSharingPool) {
+            store.state.spaceSharingPool.forEach(p => this.syncPool(p));
+          }
+        }
+      }).catch(err => {
+        console.warn('Initial cloud seed check warning:', err);
+      });
+
+      // 1. Listen for new bookings & status updates across devices
       const unsubBookings = this.db.collection('deliverease_bookings')
         .onSnapshot((snapshot) => {
           snapshot.docChanges().forEach((change) => {
@@ -197,9 +223,10 @@ window.DeliverEase.cloudDB = {
       pill.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Cloud DB: Live`;
       pill.style.background = 'rgba(16, 185, 129, 0.15)';
       pill.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-      pill.style.color = '#34d399';
+      pill.style.color = '#10b981';
+      pill.style.fontWeight = '700';
     } else {
-      pill.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #64748b; display: inline-block;"></span> Cloud DB: Local`;
+      pill.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #64748b; display: inline-block;"></span> Cloud DB: Offline`;
       pill.style.background = 'var(--bg-subtle)';
       pill.style.borderColor = 'var(--border)';
       pill.style.color = 'var(--text-muted)';
@@ -207,58 +234,49 @@ window.DeliverEase.cloudDB = {
   },
 
   renderConfigModal() {
-    const current = this.loadConfig() || {};
+    const current = this.loadConfig() || DEFAULT_FIREBASE_CONFIG;
     return `
       <div class="modal-dialog">
         <div class="modal-header">
-          <h3 class="card-title">☁️ Connect Cloud Database (Firebase / Firestore)</h3>
+          <h3 class="card-title">☁️ Firebase Firestore Cloud Database</h3>
           <button class="modal-close-btn" onclick="window.DeliverEase.ui.closeModal()">✕</button>
         </div>
         <div class="modal-body">
-          <div style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.8rem; line-height: 1.5;">
-            <strong>✨ Real-Time Multi-Device Sync:</strong> Connecting Firebase allows multiple phones, drivers, and shippers to see live bookings and GPS updates in real-time on GitHub Pages!
+          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.85rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.8rem; line-height: 1.5; color: #065f46;">
+            <strong>✨ Status:</strong> Connected to project <strong>${current.projectId}</strong>. Bookings, 50-50 space sharing, and driver trip milestones are synchronized in real-time across all devices.
           </div>
 
           <form id="cloudDbForm" onsubmit="window.DeliverEase.cloudDB.handleConfigSubmit(event)">
             <div class="form-group">
               <label class="form-label">Firebase Project ID</label>
-              <input type="text" class="form-control" id="fbProjectId" placeholder="e.g. deliverease-app" value="${current.projectId || ''}" required />
+              <input type="text" class="form-control" id="fbProjectId" placeholder="e.g. deliverease-756ec" value="${current.projectId || ''}" required />
             </div>
 
             <div class="form-group">
               <label class="form-label">Firebase API Key</label>
-              <input type="text" class="form-control" id="fbApiKey" placeholder="e.g. AIzaSyD..." value="${current.apiKey || ''}" required />
+              <input type="text" class="form-control" id="fbApiKey" placeholder="e.g. AIzaSy..." value="${current.apiKey || ''}" required />
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Auth Domain (Optional)</label>
-                <input type="text" class="form-control" id="fbAuthDomain" placeholder="deliverease-app.firebaseapp.com" value="${current.authDomain || ''}" />
+                <label class="form-label">Auth Domain</label>
+                <input type="text" class="form-control" id="fbAuthDomain" placeholder="deliverease-756ec.firebaseapp.com" value="${current.authDomain || ''}" />
               </div>
               <div class="form-group">
-                <label class="form-label">App ID (Optional)</label>
-                <input type="text" class="form-control" id="fbAppId" placeholder="1:123456789:web:abcdef" value="${current.appId || ''}" />
+                <label class="form-label">App ID</label>
+                <input type="text" class="form-control" id="fbAppId" placeholder="1:63523845169:web:..." value="${current.appId || ''}" />
               </div>
             </div>
 
             <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
               <button type="submit" class="btn btn-primary" style="flex: 1;">
-                🔗 Save & Connect Cloud DB
+                🔗 Reconnect / Update
               </button>
-              ${this.isLive ? `
-                <button type="button" class="btn btn-danger btn-sm" onclick="window.DeliverEase.cloudDB.clearConfig(); window.DeliverEase.ui.closeModal();">
-                  Disconnect
-                </button>
-              ` : ''}
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.DeliverEase.cloudDB.disconnect(); window.DeliverEase.ui.closeModal();">
+                Run Offline
+              </button>
             </div>
           </form>
-
-          <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-muted);">
-            <strong>How to get free Firebase keys (Takes 2 mins):</strong><br>
-            1. Open <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--primary);">console.firebase.google.com</a> & click <strong>Add project</strong>.<br>
-            2. In project settings, click <strong>Add web app (&lt;/&gt;)</strong> and copy your config object.<br>
-            3. Under <strong>Build > Firestore Database</strong>, click <strong>Create database</strong> in Test Mode.
-          </div>
         </div>
       </div>
     `;
